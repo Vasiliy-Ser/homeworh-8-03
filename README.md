@@ -1,4 +1,4 @@
-# Домашнее задание к занятию "Что такое DevOps. СI/СD" - Падеев Василий`
+# Домашнее задание к занятию "GitLab" - Падеев Василий`
 
 
 ---
@@ -7,10 +7,10 @@
 
 Что нужно сделать:
 
-1. Установите себе jenkins по инструкции из лекции или любым другим способом из официальной документации. Использовать Docker в этом задании нежелательно.
-2. Установите на машину с jenkins golang.
-3. Используя свой аккаунт на GitHub, сделайте себе форк репозитория. В этом же репозитории находится дополнительный материал для выполнения ДЗ.
-4. Создайте в jenkins Freestyle Project, подключите получившийся репозиторий к нему и произведите запуск тестов и сборку проекта go test . и docker build ..
+1. Разверните GitLab локально, используя Vagrantfile и инструкцию, описанные в этом репозитории.
+2. Создайте новый проект и пустой репозиторий в нём.
+3. Зарегистрируйте gitlab-runner для этого проекта и запустите его в режиме Docker. Раннер можно регистрировать и запускать на той же виртуальной машине, на которой запущен GitLab.
+4. В качестве ответа в репозиторий шаблона с решением добавьте скриншоты с настройками раннера в проекте.
 
 ```
 Поле для вставки кода...
@@ -21,9 +21,9 @@
 ```
 
 `При необходимости прикрепитe сюда скриншоты
-![1](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/1.png)
+![1](https://github.com/Vasiliy-Ser/homeworh-8-03/blob/main/img/1.1.png)
 
-![2](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/1.2.png)
+![2](https://github.com/Vasiliy-Ser/homeworh-8-03/blob/main/img/1.2.png)
 
 
 
@@ -33,108 +33,50 @@
 
 Что нужно сделать:
 
-1. Создайте новый проект pipeline.
-2. Перепишите сборку из задания 1 на declarative в виде кода.
+1. Запушьте репозиторий на GitLab, изменив origin. Это изучалось на занятии по Git.
+2. Создайте .gitlab-ci.yml, описав в нём все необходимые, на ваш взгляд, этапы.
+
+В качестве ответа в шаблон с решением добавьте:
+
+* файл gitlab-ci.yml для своего проекта или вставьте код в соответствующее поле в шаблоне;
+* скриншоты с успешно собранными сборками.
 
 Поле для вставки кода...
-....
-....
-....
-....
+```
+stages:
+  - test
+  - build
+
+test:
+  stage: test
+  image: golang:1.17
+  script: 
+   - go test .
+
+build:
+  stage: build
+  image: docker:latest
+  script:
+   - docker build .
+```
 
 
 При необходимости прикрепитe сюда скриншоты
 
-![3](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/2.1.png)
+![3](https://github.com/Vasiliy-Ser/homeworh-8-03/blob/main/img/2.2.png)
 
-![4](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/2.2.png)
-
-![5](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/2.3.png)
-
-
----
-
-### Задание 3
-
-Что нужно сделать:
-
-1. Установите на машину Nexus.
-2. Создайте raw-hosted репозиторий.
-3. Измените pipeline так, чтобы вместо Docker-образа собирался бинарный go-файл. Команду можно скопировать из Dockerfile.
-4. Загрузите файл в репозиторий с помощью jenkins.
-
-
-
-Поле для вставки кода...
-
-```
-pipeline {
-    agent any
-    environment {
-        PATH = "/usr/local/go/bin:${env.PATH}"
-    }
-    stages {
-        stage('Git') {
-            steps {
-               git 'https://github.com/netology-code/sdvps-materials.git'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'go test .'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh '''
-                mkdir -p mkdir -p /var/lib/jenkins/workspace/github
-                cp -r . /var/lib/jenkins/workspace/github
-                cd /var/lib/jenkins/workspace/github
-                CGO_ENABLED=0 GOOS=linux go build -a -installsuffix nocgo -o app
-                '''
-            }
-        }
-        stage('Upload to Nexus') {
-            steps {
-                script {
-                    def nexusUrl = 'http://localhost:8081/repository/raw/'
-                    def file = 'app'
-
-                    def uploadUrl = "${nexusUrl}${file}?e=${file}"
-                    
-                    sh """curl -v -u admin:admin \
-                        --upload-file /var/lib/jenkins/workspace/github/app \
-                        ${uploadUrl}
-                       
-                    """
-                }
-            }
-        }
-    }
-} 
-```
-
-При необходимости прикрепитe сюда скриншоты
-
-![6](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/3.1.png)
-
-![7](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/3.5edit.png)
-
-![8](https://github.com/Vasiliy-Ser/sys-pattern-homework-8-02/blob/homework8.2/Devops.CI-CD/ALL.png)
-
-
-
+![4](https://github.com/Vasiliy-Ser/homeworh-8-03/blob/main/img/2.1.png)
 Дополнительные задания* (со звёздочкой)
 Их выполнение необязательное и не влияет на получение зачёта по домашнему заданию. Можете их решить, если хотите лучше разобраться в материале.
 
 
-### Задание 4*
+### Задание 3*
 
-Придумайте способ версионировать приложение, чтобы каждый следующий запуск сборки присваивал имени файла новую версию. Таким образом, в репозитории Nexus будет храниться история релизов.
+Измените CI так, чтобы:
 
-Подсказка: используйте переменную BUILD_NUMBER.
-
-В качестве ответа пришлите скриншоты с настройками проекта и результатами выполнения сборки.
+этап сборки запускался сразу, не дожидаясь результатов тестов;
+тесты запускались только при изменении файлов с расширением *.go.
+В качестве ответа добавьте в шаблон с решением файл gitlab-ci.yml своего проекта или вставьте код в соответсвующее поле в шаблоне.
 
 
 `Приведите ответ в свободной форме........`
